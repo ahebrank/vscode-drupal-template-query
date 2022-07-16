@@ -14,10 +14,18 @@ export class Entity {
  * Drupal helper functions.
  */
 export class Drupal {
+
+  private baseUrl: string;
+  private token: string;
+
+  constructor (baseUrl: string, token: string) {
+    this.baseUrl = baseUrl;
+    this.token = token;
+  }
   /**
    * Try to get entity info from a template filename.
    */
-  static parseTemplate(filename: string): Entity|null {
+  public parseTemplate(filename: string): Entity|null {
     if (!filename.endsWith('.html.twig')) {
       return null;
     }
@@ -41,29 +49,26 @@ export class Drupal {
    * Get Drupal instance host.
    * @todo: this should be extension configuration.
    */
-  static getBaseEndpoint(): string {
-    return "http://localhost:9000/jsonapi";
+  public getBaseEndpoint(): string {
+    return this.baseUrl;
   }
 
   /**
    * Get token.
    * @todo: this should be extension configuration.
    */
-   static getApiKey(): string {
-    const user = "admin";
-    const key = "YTR5Ie4J3tFcIfbhaglWFkEnKjLtZRTRi0dssVPIxYnbnnbheT96ZgdYKMTIc70z";
-    const b = Buffer.from(user + ":" + key);
-    return b.toString('base64');
+   public getApiKey(): string {
+    return this.token;
   }
 
   /**
    * Run a fetch, get JSON.
    * @todo: authentication layer?
    */
-  static async jsonApiQuery(endpoint: string) {
+  public async jsonApiQuery(endpoint: string) {
     const response = await fetch(this.getBaseEndpoint() + endpoint, {
       headers: {
-        authorization: 'Basic ' + this.getApiKey(),
+        authorization: this.getApiKey(),
       },
     });
     return await response.json();
@@ -72,14 +77,14 @@ export class Drupal {
   /**
    * Retrieve field info for an entity.
    */
-  static async getEntityFieldInfo(e: Entity) {
+  public async getEntityFieldInfo(e: Entity) {
     const endpoint = '/field_config/field_config' +
       `?filter[entity_type]=${e.type}` +
       `&filter[bundle]=${e.bundle}`;
     return await this.jsonApiQuery(endpoint);
   }
 
-  static async getEntityDisplayInfo(e: Entity) {
+  public async getEntityDisplayInfo(e: Entity) {
     const endpoint = '/entity_view_display/entity_view_display' +
       `?filter[targetEntityType]=${e.type}` +
       `&filter[bundle]=${e.bundle}` +
