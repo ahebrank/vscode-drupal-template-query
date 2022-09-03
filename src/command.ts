@@ -1,13 +1,14 @@
 import * as vscode from 'vscode';
-import { Drupal } from './drupal';
+import { DrupalHandler } from './drupal';
+import { TokenApi } from './token-api';
 
 export class Command {
   static async lookup(context: vscode.ExtensionContext) {
     const config = vscode.workspace.getConfiguration();
-    const api = new Drupal(
+    const api = new DrupalHandler(new TokenApi(
       config.get('drupalTemplateQuery.baseUrl', ''),
       config.get('drupalTemplateQuery.token', '')
-    );
+    ));
     const filename = vscode.window.activeTextEditor?.document.fileName;
     if (filename?.endsWith('.html.twig')) {
       const entity = api.parseTemplate(filename);
